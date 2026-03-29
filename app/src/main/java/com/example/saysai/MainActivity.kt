@@ -44,6 +44,8 @@ class MainActivity : AppCompatActivity(), HandLandmarkerHelper.Listener {
     private var lastDetectRequestMs = 0L
 
     private val collectedSigns = mutableListOf<String>()
+    private val collectedAccuracies = mutableListOf<Int>()
+    private val collectedResponseTimes = mutableListOf<Long>()
     private var lastAddedLabel = ""
     private var lastAddedMs = 0L
     private var isStarted = false
@@ -81,6 +83,8 @@ class MainActivity : AppCompatActivity(), HandLandmarkerHelper.Listener {
 
         clearButton.setOnClickListener {
             collectedSigns.clear()
+            collectedAccuracies.clear()
+            collectedResponseTimes.clear()
             lastAddedLabel = ""
             lastAddedMs = 0L
             isStarted = false
@@ -93,9 +97,23 @@ class MainActivity : AppCompatActivity(), HandLandmarkerHelper.Listener {
 
         doneButton.setOnClickListener {
             val sentence = collectedSigns.joinToString(" ")
+
+            val averageAccuracy = if (collectedAccuracies.isNotEmpty()) {
+                collectedAccuracies.average().toInt()
+            } else {
+                0
+            }
+
+            val averageResponseTimeMs = if (collectedResponseTimes.isNotEmpty()) {
+                collectedResponseTimes.average().toLong()
+            } else {
+                0L
+            }
+
             val intent = Intent(this, ResultActivity::class.java)
             intent.putExtra("SENTENCE", sentence)
-            intent.putExtra("CONFIDENCE", latestConfidencePct)
+            intent.putExtra("ACCURACY_SCORE", averageAccuracy)
+            intent.putExtra("RESPONSE_TIME_MS", averageResponseTimeMs)
             startActivity(intent)
             overridePendingTransition(0, 0)
         }
@@ -261,6 +279,8 @@ class MainActivity : AppCompatActivity(), HandLandmarkerHelper.Listener {
                 } else if (now - lastAddedMs >= 1000L &&
                     collectedSigns.lastOrNull() != label) {
                     collectedSigns.add(label)
+                    collectedAccuracies.add(pct)
+                    collectedResponseTimes.add(now - lastAddedMs)
                     addChip(label, collectedSigns.size - 1)
                 }
             } else {

@@ -5,7 +5,6 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
@@ -20,10 +19,12 @@ class ResultActivity : AppCompatActivity() {
         setContentView(R.layout.activity_result)
 
         val sentence = intent.getStringExtra("SENTENCE") ?: "(nothing signed)"
-        val confidence = intent.getIntExtra("CONFIDENCE", 90)
+        val accuracyScore = intent.getIntExtra("ACCURACY_SCORE", 0)
+        val responseTimeMs = intent.getLongExtra("RESPONSE_TIME_MS", 0L)
 
         val resultSentence = findViewById<TextView>(R.id.resultSentence)
         val confidenceText = findViewById<TextView>(R.id.confidenceText)
+        val responseTimeText = findViewById<TextView>(R.id.responseTimeText)
         val btnBack = findViewById<ImageView>(R.id.btn_back)
         val btnTranslate = findViewById<ImageView>(R.id.btn_translate)
         val btnCopy = findViewById<ImageView>(R.id.btn_copy)
@@ -34,7 +35,8 @@ class ResultActivity : AppCompatActivity() {
         val navArchive = findViewById<ImageView>(R.id.navArchive)
 
         resultSentence.text = sentence
-        confidenceText.text = "Confidence Level: ${confidence}%"
+        confidenceText.text = "Accuracy Score: ${accuracyScore}%"
+        responseTimeText.text = "Response Time: ${responseTimeMs} ms"
 
         btnBack.setOnClickListener {
             overridePendingTransition(0, 0)
